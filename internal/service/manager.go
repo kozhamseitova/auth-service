@@ -1,19 +1,18 @@
 package service
 
 import (
-	"context"
-
 	"github.com/kozhamseitova/auth-service/internal/repository"
+	"github.com/kozhamseitova/auth-service/pkg/jwttoken"
 )
 
 type Manager struct {
-	ctx context.Context
 	repository repository.Repository
+	token *jwttoken.JWTToken
 }
 
-func NewService(ctx context.Context, repository repository.Repository) *Manager {
+func NewService(repository repository.Repository, token *jwttoken.JWTToken) *Manager {
 	return &Manager{
-		ctx: ctx,
 		repository: repository,
+		token: token,
 	}
 }

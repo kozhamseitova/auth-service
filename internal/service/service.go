@@ -1,12 +1,11 @@
 package service
 
-import (
-	"context"
+import "context"
 
-	"github.com/google/uuid"
-)
+// "github.com/google/uuid"
 
 type Service interface {
-	Login(ctx context.Context, id uuid.UUID) (string, string, error)
-	Refresh(ctx context.Context, refreshToken string) (string, string, error)
+	Create(ctx context.Context) (string, error)
+	// Login(ctx context.Context, id uuid.UUID) (string, string, error)
+	// Refresh(ctx context.Context, refreshToken string) (string, string, error)
 }
