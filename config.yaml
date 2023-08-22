@@ -1,0 +1,6 @@
+http:
+  port: ':8080'
+  timeout: '30s'
+  shutdown_timeout: '15s'
+  read_timeout: '15s'
+  write_timeout: '60s'
