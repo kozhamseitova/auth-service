@@ -33,8 +33,8 @@ func Run(ctx context.Context, cfg *config.Config) error {
 		return err
 	}
 
-	repo := repository.NewRepository(dbClient)
-	srvc := service.NewService(repo, token)
+	repo := repository.NewRepository(dbClient, cfg.DB)
+	srvc := service.NewService(repo, token, cfg.Token)
 	hndlr := handler.NewHandler(srvc, cfg)
 
 	server := httpserver.New(

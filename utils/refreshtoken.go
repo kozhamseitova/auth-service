@@ -4,17 +4,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func HashRefreshToken(refreshToken string) (string, error) {
-	hashedToken, err := bcrypt.GenerateFromPassword([]byte(refreshToken), bcrypt.DefaultCost)
+func HashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
 
-	return string(hashedToken), nil
+	return string(hashedPassword), nil
 }
 
-func CheckRefreshToken(refreshToken, hashedRefreshToken string) error {
-	err := bcrypt.CompareHashAndPassword([]byte(hashedRefreshToken), []byte(refreshToken))
+func CheckPassword(password, hashedPassword string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
 		return err
 	}

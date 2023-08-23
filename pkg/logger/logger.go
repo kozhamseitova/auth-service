@@ -23,7 +23,6 @@ func NewLogger(production bool) (Logger, error) {
 	config := zap.NewProductionConfig()
 	config.DisableStacktrace = true
 	config.EncoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
-	// config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	l, err := config.Build(zap.AddCallerSkip(1))
 	if err != nil {
 		return nil, err

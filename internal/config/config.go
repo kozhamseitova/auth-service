@@ -35,7 +35,8 @@ type ServerConfig struct {
 
 type TokenConfig struct {
 	SecretKey  string        `env:"TOKEN_SECRET_KEY" env-required:"true"`
-	TimeToLive time.Duration `yaml:"time_to_live"`
+	TimeToLiveAccess time.Duration `yaml:"time_to_live_access"`
+	TimeToLiveRefresh time.Duration `yaml:"time_to_live_refresh"`
 }
 
 func InitConfig(path string) (*Config, error) {

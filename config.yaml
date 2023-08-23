@@ -16,4 +16,5 @@ db:
   db_name: 'auth-service'
 
 token:
-  time_to_live: "15m"
+  time_to_live_access: "2m"
+  time_to_live_refresh: "3m"
