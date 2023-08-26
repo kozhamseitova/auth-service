@@ -17,6 +17,16 @@ const (
 	traceIdHeader       = "X-TRACE-ID"
 )
 
+//userIdentity
+//
+// @Summary User Identity Middleware
+// @Description Verifies user identity using a JWT token from the Authorization header
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} api.Ok
+// @Failure 401 {object} api.Error
 func (h *Handler) userIdentity(c *fiber.Ctx) error {
 	header := c.Get(authorizationHeader)
 	if header == "" {
@@ -53,6 +63,15 @@ func (h *Handler) userIdentity(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+//generateTraceId
+//
+// @Summary Generate Trace ID Middleware
+// @Description Generates a unique trace ID for tracking requests
+// @Tags Logging
+// @Accept json
+// @Produce json
+// @Success 200 {object} api.Ok
+// @Failure 500 {object} api.Error
 func (h *Handler) generateTraceId(c *fiber.Ctx) error {
 	traceId := c.Get(traceIdHeader)
 	if traceId == "" {

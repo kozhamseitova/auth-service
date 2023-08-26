@@ -10,10 +10,22 @@ import (
 	"github.com/kozhamseitova/auth-service/utils"
 )
 
+// create
+//
+// @Summary Create a new user
+// @Description Creates a new user and returns the user ID
+// @Tags User
+// @Produce json
+// @Success 201 {object} api.Ok
+// @Failure 500 {object} api.Error
+// @Router /create [post]
 func (h *Handler) create(c *fiber.Ctx) error {
 	id, err := h.service.Create(c.Context())
 	if err != nil {
-		return c.SendStatus(http.StatusInternalServerError)
+		return c.Status(http.StatusInternalServerError).JSON(&api.Error{
+			Code:    http.StatusInternalServerError,
+			Message: "internal server error",
+		})
 	}
 
 	return c.Status(http.StatusCreated).JSON(&api.Ok{
@@ -25,15 +37,33 @@ func (h *Handler) create(c *fiber.Ctx) error {
 	})
 }
 
+//login
+//
+// @Summary User login
+// @Description Logs in a user and returns access and refresh tokens
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param id query string true "User ID"
+// @Success 200 {object} api.Ok
+// @Failure 404 {object} api.Error
+// @Failure 500 {object} api.Error
+// @Router /login [post]
 func (h *Handler) login(c *fiber.Ctx) error {
 	id := c.Query("id")
 
 	tokens, err := h.service.Login(c.Context(), id)
 	if err != nil {
 		if errors.Is(err, utils.ErrUserNotFound){
-			return c.SendStatus(http.StatusNotFound)
+			return c.Status(http.StatusNotFound).JSON(&api.Error{
+				Code:    http.StatusNotFound,
+				Message: "user not found",
+			})
 		}
-		return c.SendStatus(http.StatusInternalServerError)
+		return c.Status(http.StatusInternalServerError).JSON(&api.Error{
+			Code:    http.StatusInternalServerError,
+			Message: "internal server error",
+		})
 	}
 
 	return c.Status(http.StatusOK).JSON(&api.Ok{
@@ -46,6 +76,14 @@ func (h *Handler) login(c *fiber.Ctx) error {
 	})
 }
 
+
+//check
+// @Summary Check user authentication
+// @Description Checks user authentication status
+// @Tags Auth
+// @Produce json
+// @Success 200 {object} api.Ok
+// @Router /check [post]
 func (h *Handler) check(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(&api.Ok{
@@ -57,6 +95,19 @@ func (h *Handler) check(c *fiber.Ctx) error {
 	})
 }
 
+//refresh
+//
+// @Summary Refresh access and refresh tokens
+// @Description Refreshes access and refresh tokens for a user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param user body entity.User true "User data for refresh"
+// @Success 200 {object} api.Ok
+// @Failure 404 {object} api.Error
+// @Failure 401 {object} api.Error
+// @Failure 500 {object} api.Error
+// @Router /refresh [post]
 func (h *Handler) refresh(c *fiber.Ctx) error {
 	var req entity.User
 	err := c.BodyParser(&req)
@@ -81,7 +132,10 @@ func (h *Handler) refresh(c *fiber.Ctx) error {
 				Message: err.Error(),
 			})
 		}
-		return c.SendStatus(http.StatusInternalServerError)
+		return c.Status(http.StatusInternalServerError).JSON(&api.Error{
+			Code:    http.StatusInternalServerError,
+			Message: "internal server error",
+		})
 	}
 
 	return c.Status(http.StatusOK).JSON(&api.Ok{

@@ -1,0 +1,131 @@
+definitions:
+  api.Error:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  api.Ok:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  entity.User:
+    properties:
+      id:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: kozhamseitova91@gmail.com
+    name: Aisha
+  description: Api for simple auth with access and refresh tokens.
+  title: Auth Service
+  version: 0.0.1
+paths:
+  /check:
+    post:
+      description: Checks user authentication status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Ok'
+      summary: Check user authentication
+      tags:
+      - Auth
+  /create:
+    post:
+      description: Creates a new user and returns the user ID
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.Ok'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Error'
+      summary: Create a new user
+      tags:
+      - User
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user and returns access and refresh tokens
+      parameters:
+      - description: User ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Ok'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Error'
+      summary: User login
+      tags:
+      - Auth
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refreshes access and refresh tokens for a user
+      parameters:
+      - description: User data for refresh
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/entity.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Ok'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Error'
+      summary: Refresh access and refresh tokens
+      tags:
+      - Auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
