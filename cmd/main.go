@@ -6,9 +6,6 @@ import (
 
 	"github.com/kozhamseitova/auth-service/internal/app"
 	"github.com/kozhamseitova/auth-service/internal/config"
-
-	"github.com/swaggo/gin-swagger" // gin-swagger middleware
-    "github.com/swaggo/files" // swagger embed files
 )
 
 // @title           Auth Service
@@ -19,7 +16,7 @@ import (
 // @contact.email  kozhamseitova91@gmail.com
 
 // @host      localhost:8080
-// @BasePath  
+// @BasePath  /api
 
 // @securitydefinitions.apikey ApiKeyAuth
 // @in header
