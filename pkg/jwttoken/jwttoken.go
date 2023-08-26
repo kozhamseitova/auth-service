@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"github.com/google/uuid"
+
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
+	"github.com/kozhamseitova/auth-service/utils"
 )
 
 type JWTToken struct {
@@ -43,20 +45,20 @@ func (j *JWTToken) ValidateToken(token string) (*JWTPayload, error) {
 			return []byte(j.secretKey), nil
 		}
 
-		return nil, ErrInvalidToken
+		return nil, utils.ErrInvalidToken
 	}
 
 	jwtToken, err := jwt.ParseWithClaims(token, &JWTPayload{}, keyFunc)
 	if err != nil {
 		validationErr, ok := err.(*jwt.ValidationError)
-		if ok && errors.Is(validationErr, ErrExpiredToken) {
-			return nil, ErrInvalidToken
+		if ok && errors.Is(err, validationErr) {
+			return nil, utils.ErrExpiredToken
 		}
 	}
 
 	payload, ok := jwtToken.Claims.(*JWTPayload)
 	if !ok {
-		return nil, ErrInvalidToken
+		return nil, utils.ErrInvalidToken
 	}
 
 	return payload, nil

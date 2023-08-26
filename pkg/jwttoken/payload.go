@@ -1,16 +1,12 @@
 package jwttoken
 
 import (
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kozhamseitova/auth-service/utils"
 )
 
-var (
-	ErrInvalidToken = errors.New("invalid token err")
-	ErrExpiredToken = errors.New("expired token err")
-)
 
 type JWTPayload struct {
 	ID        uuid.UUID `json:"id"`
@@ -21,7 +17,7 @@ type JWTPayload struct {
 
 func (j JWTPayload) Valid() error {
 	if time.Now().After(j.ExpiredAt) {
-		return ErrExpiredToken
+		return utils.ErrExpiredToken
 	}
 
 	return nil

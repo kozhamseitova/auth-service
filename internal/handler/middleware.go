@@ -1,13 +1,14 @@
 package handler
 
 import (
-	"context"
+	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/kozhamseitova/auth-service/api"
+	"github.com/kozhamseitova/auth-service/utils"
 )
 
 const (
@@ -33,13 +34,21 @@ func (h *Handler) userIdentity(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err := h.service.VerifyToken(c.Context(), headerParts[1])
+	id, err := h.service.VerifyToken(c.Context(), headerParts[1])
 	if err != nil {
+		if errors.Is(err, utils.ErrExpiredToken){
+			return c.Status(http.StatusUnauthorized).JSON(&api.Error{
+				Code:    http.StatusUnauthorized,
+				Message: "session timeout",
+			})
+		}
 		return c.Status(http.StatusUnauthorized).JSON(&api.Error{
 			Code:    http.StatusUnauthorized,
 			Message: "invalid token",
 		})
 	}
+
+	c.Locals("userID", id)
 
 	return c.Next()
 }
