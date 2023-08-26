@@ -49,24 +49,6 @@ func (m *Manager) GetUserById(ctx context.Context, id string) (*entity.User, err
 	return user, nil
 }
 
-func (m *Manager) GetByRefreshToken(ctx context.Context, refreshToken string) (*entity.User, error) {
-	userCollection := m.client.Database(m.config.DBName).Collection(collectionName)
-	
-	filter := bson.D{{"refresh_token", refreshToken}}
-	
-	user := new(entity.User)
-	err := userCollection.FindOne(context.TODO(), filter).Decode(&user)
-	if err != nil {
-		m.logger.Errorf(ctx, "[GetByRefreshToken] err: %v", err)
-		if errors.Is(err, mongo.ErrNoDocuments){
-			return nil, utils.ErrUserNotFound
-		}
-		return nil, utils.ErrInternalError
-	}
-	
-	return user, nil
-}
-
 func (m *Manager) UpdateRefreshToken(ctx context.Context, id, refreshToken string) error {
 	userCollection := m.client.Database(m.config.DBName).Collection(collectionName)
 
