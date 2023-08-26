@@ -9,17 +9,7 @@ import (
 )
 
 func (h *Handler) create(c *fiber.Ctx) error{
-	var req entity.User
-
-	err := c.BodyParser(&req)
-	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(&api.Error{
-			Code:    http.StatusBadRequest,
-			Message: "invalid body param",
-		})
-	}
-
-	id, err := h.service.Create(c.Context(), &req)
+	id, err := h.service.Create(c.Context())
 	if err != nil {
 		return c.SendStatus(http.StatusInternalServerError)
 	}
@@ -34,16 +24,9 @@ func (h *Handler) create(c *fiber.Ctx) error{
 }
 
 func (h *Handler) login(c *fiber.Ctx) error{
-	var req entity.User
-
-	err := c.BodyParser(&req)
-	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(&api.Error{
-			Code:    http.StatusBadRequest,
-			Message: "invalid body param",
-		})
-	}
-	accesToken, refreshToken,  err := h.service.Login(c.Context(), req.Name, req.Password)
+	id:= c.Params("id")
+	
+	tokens,  err := h.service.Login(c.Context(), id)
 	if err != nil {
 		return c.SendStatus(http.StatusInternalServerError)
 	}
@@ -52,12 +35,33 @@ func (h *Handler) login(c *fiber.Ctx) error{
 		Code:    http.StatusCreated,
 		Message: "success",
 		Data: fiber.Map{
-			"accessToken": accesToken,
-			"refreshToken": refreshToken,
+			"accessToken": tokens.AccessToken,
+			"refreshToken": tokens.RefreshToken,
 		},
 	})
 }
 
-// func (h *Handler) refresh(c *fiber.Ctx) error{
-// 	
-// }
+func (h *Handler) refresh(c *fiber.Ctx) error{
+	var req entity.Token
+	err := c.BodyParser(&req)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(&api.Error{
+			Code:    http.StatusBadRequest,
+			Message: "invalid body param",
+		})
+	}
+	
+	tokens,  err := h.service.Refresh(c.Context(), req.RefreshToken)
+	if err != nil {
+		return c.SendStatus(http.StatusInternalServerError)
+	}
+
+	return c.Status(http.StatusCreated).JSON(&api.Ok{
+		Code:    http.StatusCreated,
+		Message: "success",
+		Data: fiber.Map{
+			"accessToken": tokens.AccessToken,
+			"refreshToken": tokens.RefreshToken,
+		},
+	})
+}

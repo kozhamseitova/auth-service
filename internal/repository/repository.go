@@ -4,13 +4,11 @@ import (
 	"context"
 
 	"github.com/kozhamseitova/auth-service/internal/entity"
-	// "github.com/google/uuid"
 )
 
 type Repository interface {	
-	Create(ctx context.Context, user *entity.User) (string, error)
-	GetUserByName(ctx context.Context, name string) (*entity.User, error)
+	Create(ctx context.Context) (string, error)
 	GetUserById(ctx context.Context, id string) (*entity.User, error)
-	// GetUserByRefreshToken(ctx context.Context, refreshToken string) (string, error)
+	GetByRefreshToken(ctx context.Context, refreshToken string) (*entity.User, error)
 	UpdateRefreshToken(ctx context.Context, id, refreshToken string) error
 }

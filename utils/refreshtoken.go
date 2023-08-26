@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"encoding/base64"
+	"math/rand"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,4 +23,15 @@ func CheckPassword(password, hashedPassword string) error {
 	}
 
 	return nil
+}
+
+func GenerateRefreshToken() (string, error) {
+	n := rand.Intn(11) + 10
+	refreshToken := make([]byte, n)
+	_, err := rand.Read(refreshToken)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.URLEncoding.EncodeToString(refreshToken), nil
 }

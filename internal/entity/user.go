@@ -4,6 +4,5 @@ package entity
 
 type User struct {
 	ID string `bson:"_id,omitempty"`
-	Name string `bson:"name" binding:"required"`
-	Password string `bson:"password" binding:"required"`
+	RefreshToken string `bson:"refresh_token"`
 }

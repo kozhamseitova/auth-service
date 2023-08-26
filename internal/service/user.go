@@ -7,24 +7,8 @@ import (
 	"github.com/kozhamseitova/auth-service/utils"
 )
 
-func (m *Manager) Create(ctx context.Context, user *entity.User) (string, error) {
-	user, err := m.repository.GetUserByName(ctx, user.Name)
-	if err != nil {
-		return "", err
-	}
-
-	if user != nil {
-		return "", utils.ErrUserAlreadyExists
-	}
-
-	hashedPassword, err := utils.HashPassword(user.Password)
-	if err != nil {
-		return "", utils.ErrInternalError
-	}
-
-	user.Password = hashedPassword
-
-	id, err := m.repository.Create(ctx, user)
+func (m *Manager) Create(ctx context.Context) (string, error) {
+	id, err := m.repository.Create(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -32,72 +16,86 @@ func (m *Manager) Create(ctx context.Context, user *entity.User) (string, error)
 	return id, nil
 }
 
-func (m *Manager) Login(ctx context.Context, name, password string) (string, string, error) {
-	user, err := m.repository.GetUserByName(ctx, name) 
+func (m *Manager) Login(ctx context.Context, id string) (*entity.Token, error) {
+	_, err := m.repository.GetUserById(ctx, id) 
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
-	err = utils.CheckPassword(password, user.Password)
+	accesToken, err := m.token.CreateToken(id, m.config.TimeToLiveAccess)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
-	accesToken, err := m.token.CreateToken(user.ID, m.config.TimeToLiveAccess)
+	refreshToken, err := utils.GenerateRefreshToken()
 	if err != nil {
-		return "", "", err
-	}
-
-	refreshToken, err := m.token.CreateToken(user.ID, m.config.TimeToLiveRefresh)
-	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	hashedRefreshToken, err := utils.HashPassword(refreshToken)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
-	err = m.repository.UpdateRefreshToken(ctx, user.ID, hashedRefreshToken)
+	err = m.repository.UpdateRefreshToken(ctx, id, hashedRefreshToken)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
-	return accesToken, refreshToken, nil
+	token := &entity.Token{
+		AccessToken: accesToken,
+		RefreshToken: refreshToken,
+	}
+
+	return token, nil
 
 }
 
-func (m *Manager) Refresh(ctx context.Context, id, refreshToken string) (string, string, error) {
-	user, err := m.repository.GetUserById(ctx, id) 
+func (m *Manager) Refresh(ctx context.Context, refreshToken string) (*entity.Token, error) {
+	user, err := m.repository.GetByRefreshToken(ctx, refreshToken) 
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
-	err = utils.CheckPassword(refreshToken, user.Password)
+	err = utils.CheckPassword(refreshToken, user.RefreshToken)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	accesToken, err := m.token.CreateToken(user.ID, m.config.TimeToLiveAccess)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
-	newRefreshToken, err := m.token.CreateToken(user.ID, m.config.TimeToLiveRefresh)
+	newRefreshToken, err := utils.GenerateRefreshToken()
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	hashedRefreshToken, err := utils.HashPassword(newRefreshToken)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	err = m.repository.UpdateRefreshToken(ctx, user.ID, hashedRefreshToken)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
-	return accesToken, newRefreshToken, nil
+	tokens := &entity.Token{
+		AccessToken: accesToken,
+		RefreshToken: refreshToken,
+	}
 
+	return tokens, nil
+
+}
+
+func(m *Manager) VerifyToken(ctx context.Context, token string) (string, error) {
+	payload, err := m.token.ValidateToken(token)
+	if err != nil {
+		return "", utils.ErrInternalError
+	}
+
+	return payload.UserId, nil
 }

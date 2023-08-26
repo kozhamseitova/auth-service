@@ -12,15 +12,13 @@ import (
 
 const collectionName = "user"
 
-func (m *Manager) Create(ctx context.Context, user *entity.User) (string, error) {
+func (m *Manager) Create(ctx context.Context) (string, error) {
 	userCollection := m.client.Database(m.config.DBName).Collection(collectionName)
 
 	id := uuid.New().String()
 	
 	newUser := entity.User{
 		ID: id,
-		Name: user.Name,
-		Password: user.Password,
 	}
 
 	insertResult, err := userCollection.InsertOne(ctx, newUser)
@@ -28,23 +26,6 @@ func (m *Manager) Create(ctx context.Context, user *entity.User) (string, error)
 		return "", nil
 	}
 	return fmt.Sprintf("%v", insertResult.InsertedID), nil
-}
-
-
-func (m *Manager) GetUserByName(ctx context.Context, name string) (*entity.User, error) {
-	userCollection := m.client.Database(m.config.DBName).Collection(collectionName)
-	
-	filter := bson.D{{"name", name}}
-	
-	user := new(entity.User)
-	err := userCollection.FindOne(context.TODO(), filter).Decode(&user)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return user, err
-		}
-	}
-	
-	return user, nil
 }
 
 func (m *Manager) GetUserById(ctx context.Context, id string) (*entity.User, error) {
@@ -63,9 +44,21 @@ func (m *Manager) GetUserById(ctx context.Context, id string) (*entity.User, err
 	return user, nil
 }
 
-// func (m *Manager) GetUserByRefreshToken(ctx context.Context, refreshToken string) error {
-
-// }
+func (m *Manager) GetByRefreshToken(ctx context.Context, refreshToken string) (*entity.User, error) {
+	userCollection := m.client.Database(m.config.DBName).Collection(collectionName)
+	
+	filter := bson.D{{"refresh_token", refreshToken}}
+	
+	user := new(entity.User)
+	err := userCollection.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return user, err
+		}
+	}
+	
+	return user, nil
+}
 
 func (m *Manager) UpdateRefreshToken(ctx context.Context, id, refreshToken string) error {
 	userCollection := m.client.Database(m.config.DBName).Collection(collectionName)
